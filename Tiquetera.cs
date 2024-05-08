@@ -1,8 +1,5 @@
 static class Tiquetera {
-    const double TIPO1_VALOR = 45000;
-    const double TIPO2_VALOR = 60000;
-    const double TIPO3_VALOR = 30000;
-    const double TIPO4_VALOR = 100000;
+    public static double[] tiposValores = { 45000, 60000, 30000, 100000 };
     private static Dictionary<int, Cliente> DicClientes = new Dictionary<int, Cliente>();
     private static int UltimoIDEntrada = 0;
     
@@ -23,32 +20,107 @@ static class Tiquetera {
             resultado = DicClientes[id];
         return resultado;
     }
-    public static double CalcularValorEntrada()
+    public static double CalcularImporte(int tipo, int cantidad)
     {
-        if (tipoEntrada == TIPO1_OP)
-            valor = TIPO1_VALOR;
-        else if (tipoEntrada == TIPO2_OP)
-            valor = TIPO2_VALOR;
-        else if (tipoEntrada == TIPO3_OP)
-            valor = TIPO3_VALOR;
-        else
-            valor = TIPO4_VALOR;
-        return valor * cantidadEntrada;
+        return tiposValores[tipo - 1] * cantidad;
     }
-    // No se puede devolver true o false usando int.
-    public static bool CambiarEntrada(int id, int tipo, int cantidad, )
+
+    public static bool CambiarEntrada(int id, int tipo, int cantidad)
     {
-        double viejoImporte;
-        double nuevoImporte;
         bool exitoso = false;
         
-        if (DicClientes.ContainsKey(id))
+        if (DicClientes.ContainsKey(id) && CalcularImporte(tipo, cantidad) > DicClientes[id].Importe)
         {
             DicClientes[id].TipoEntrada = tipo;
             DicClientes[id].Cantidad = cantidad;
+            DicClientes[id].Importe = CalcularImporte(tipo, cantidad);
             exitoso = true;
         }
         
         return exitoso;
+    }
+    public static void EstadisticasTiquetera()
+    {
+        int cantClientes = DicClientes.Count();
+        int cantEntradas;
+        double recaudacionTotal = 0;
+        int[] cantClientesTipos = new int[tiposValores.Length];
+        int[] cantEntradasTipos = new int[tiposValores.Length];
+        double[] recaudacionTipos = new double[tiposValores.Length];
+        double[] porcentajeEntradasTipos = new double[tiposValores.Length];
+
+        if (cantClientes > 0) {
+            cantEntradas = ObtenerTotalEntradas();
+
+            for (int i = 0; i < tiposValores.Length; i++)
+            {
+                cantClientesTipos[i] = ObtenerCantidadClientesTipo(i + 1);
+                cantEntradasTipos[i] = ObtenerCantidadEntradasTipo(i + 1);
+                recaudacionTipos[i] = ObtenerRecaudacionTipo(i + 1);
+                recaudacionTotal += recaudacionTipos[i];
+            }
+            for (int i = 0; i < tiposValores.Length; i++)
+                porcentajeEntradasTipos[i] = CalcularPorcentaje(cantEntradasTipos[i], cantEntradas);
+
+
+            Console.WriteLine("Cantidad de clientes: " + cantClientes);
+            for (int i = 0; i < tiposValores.Length; i++)
+            {
+                Console.WriteLine("Tipo de entrada " + (i + 1) + " ===");
+                Console.WriteLine("- Cantidad de clientes: " + cantClientesTipos[i]);
+                Console.WriteLine("- Porcentaje de entradas: " + porcentajeEntradasTipos[i] + "(" + cantEntradasTipos[i] + "%)");
+                Console.WriteLine("- Recaudación: " + recaudacionTipos[i]);
+            }
+            Console.WriteLine("Cantidad de clientes: " + cantClientes);
+            Console.WriteLine("Recaudación total: " + recaudacionTotal);
+        }
+        else
+            Console.WriteLine("Error: Aún no se anotó nadie.");
+
+
+    }
+
+    private static int ObtenerTotalEntradas()
+    {
+        int cantidad = 0;
+        foreach (int key in DicClientes.Keys)
+        {
+            cantidad += DicClientes[key].Cantidad;
+        }
+        return cantidad;
+    }
+    private static int ObtenerCantidadClientesTipo(int tipo)
+    {
+        int cantidad = 0;
+        foreach (int key in DicClientes.Keys)
+        {
+            if (DicClientes[key].TipoEntrada == tipo)
+                cantidad++;
+        }
+        return cantidad;
+    }
+    private static int ObtenerCantidadEntradasTipo(int tipo)
+    {
+        int cantidad = 0;
+        foreach (int key in DicClientes.Keys)
+        {
+            if (DicClientes[key].TipoEntrada == tipo)
+                cantidad += DicClientes[key].Cantidad;
+        }
+        return cantidad;
+    }
+    private static double ObtenerRecaudacionTipo(int tipo)
+    {
+        double recaudacion = 0;
+        foreach (int key in DicClientes.Keys)
+        {
+            if (DicClientes[key].TipoEntrada == tipo)
+                recaudacion += DicClientes[key].Importe;
+        }
+        return recaudacion;
+    }
+    private static double CalcularPorcentaje(double cantidad, double total)
+    {
+        return cantidad * 100 / total;
     }
 }

@@ -4,16 +4,13 @@ const int OP_BUSCAR = 3;
 const int OP_CAMBIAR = 4;
 const int OP_SALIR = 5;
 const int OP_MIN = OP_NUEVO, OP_MAX = OP_SALIR;
-const int TIPO1_OP = 1, TIPO2_OP = 2, TIPO3_OP = 3;
 const int TIPO_DESDE = 1, TIPO_HASTA = 4;
-const double TIPO1_VALOR = 45000;
-const double TIPO2_VALOR = 60000;
-const double TIPO3_VALOR = 30000;
-const double TIPO4_VALOR = 100000;
-int opcion, dni, tipoEntrada, cantidadEntrada;
-double importe, valor;
+const char MONEDA = '$';
+bool cambioExitoso;
+int opcion, dni, tipoEntrada, cantidadEntrada, id;
+double importe;
 string apellido, nombre;
-Cliente? clienteEncontrado;
+Cliente? cliente;
 DateTime fechaInscripcion;
 
 
@@ -53,16 +50,6 @@ static int IngresarEnteroDesde(string mensaje, int min)
         ingreso = IngresarEntero("Error: entero menor a " + min + ".\n" + mensaje);
     return ingreso;
 }
-static DateTime IngresarFecha(string mensaje)
-{
-    DateTime ingreso;
-    bool esEntero = DateTime.TryParse(IngresarCadena(mensaje), out ingreso);
-
-    while (!esEntero)
-        esEntero = DateTime.TryParse(IngresarCadena("Error: ingrese una fecha válida.\n" + mensaje), out ingreso);
-
-    return ingreso;
-}
 
 
 do
@@ -80,25 +67,61 @@ do
             dni = IngresarEnteroDesde("DNI: ", 1);
             apellido = IngresarCadenaNoVacia("Apellido: ");
             nombre = IngresarCadenaNoVacia("Nombre: ");
-            fechaInscripcion = DateTime.Now;
             tipoEntrada = IngresarEnteroEntre("Tipo de entrada: ", TIPO_DESDE, TIPO_HASTA);
             cantidadEntrada = IngresarEnteroDesde("Cantidad de entradas: ", 1);
-            
-            
+            importe = Tiquetera.CalcularImporte(tipoEntrada, cantidadEntrada);
+            fechaInscripcion = DateTime.Now;
 
             Tiquetera.AgregarCliente(new Cliente(dni, apellido, nombre, fechaInscripcion, tipoEntrada, cantidadEntrada, importe));
             break;
         
         case OP_ESTADISTICAS:
+            Tiquetera.EstadisticasTiquetera();
             break;
         
         case OP_BUSCAR:
-            clienteEncontrado = Tiquetera.BuscarCliente(IngresarEnteroDesde("DNI: ", 1));
-            while (clienteEncontrado == null)
-                clienteEncontrado = Tiquetera.BuscarCliente(IngresarEnteroDesde("Error: cliente no encontrado.\nDNI: ", 1));
+            id = IngresarEnteroDesde("ID: ", 1);
+            cliente = Tiquetera.BuscarCliente(id);
+            while (cliente == null)
+            {
+                id = IngresarEnteroDesde("Error: cliente no encontrado.\nID: ", 1);
+                cliente = Tiquetera.BuscarCliente(id);
+            }
+
+            Console.WriteLine("DNI: " + cliente.DNI);
+            Console.WriteLine("Apellido: " + cliente.Apellido);
+            Console.WriteLine("Nombre: " + cliente.Nombre);
+            Console.WriteLine("Fecha de inscripción: " + cliente.FechaInscripcion.ToLongDateString());
+            Console.WriteLine("Tipo de entrada: " + cliente.TipoEntrada);
+            Console.WriteLine("Cantidad: " + cliente.Cantidad);
+            Console.WriteLine("Importe a abonar: " + MONEDA + cliente.Importe);
             break;
         
         case OP_CAMBIAR:
+            id = IngresarEnteroDesde("ID: ", 1);
+            cliente = Tiquetera.BuscarCliente(id);
+            while (cliente == null)
+            {
+                id = IngresarEnteroDesde("Error: cliente no encontrado.\nID: ", 1);
+                cliente = Tiquetera.BuscarCliente(id);
+            }
+
+            Console.WriteLine("Tipo original: " + cliente.TipoEntrada);
+            Console.WriteLine("Cantidad original: " + cliente.Cantidad);
+            Console.WriteLine("Importe original: " + MONEDA + cliente.Importe);
+
+            tipoEntrada = IngresarEnteroEntre("Nuevo tipo de entrada: ", TIPO_DESDE, TIPO_HASTA);
+            cantidadEntrada = IngresarEnteroDesde("Nueva cantidad: ", 1);
+            cambioExitoso = Tiquetera.CambiarEntrada(id, tipoEntrada, cantidadEntrada);
+            while (!cambioExitoso)
+            {
+                Console.WriteLine("Error: el importe resultante debe ser mayor a lo anteriormente comprado.");
+                tipoEntrada = IngresarEnteroEntre("Nuevo tipo de entrada: ", TIPO_DESDE, TIPO_HASTA);
+                cantidadEntrada = IngresarEnteroDesde("Nueva cantidad: ", 1);
+                cambioExitoso = Tiquetera.CambiarEntrada(id, tipoEntrada, cantidadEntrada);
+            }
+
+            cliente.FechaInscripcion = DateTime.Now;
             break;
     }
 
