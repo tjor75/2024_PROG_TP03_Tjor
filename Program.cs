@@ -72,7 +72,9 @@ do
             importe = Tiquetera.CalcularImporte(tipoEntrada, cantidadEntrada);
             fechaInscripcion = DateTime.Now;
 
-            Tiquetera.AgregarCliente(new Cliente(dni, apellido, nombre, fechaInscripcion, tipoEntrada, cantidadEntrada, importe));
+            Tiquetera.AgregarCliente(new Cliente(dni, apellido, nombre, fechaInscripcion, tipoEntrada, cantidadEntrada));
+            
+            Console.WriteLine("[Registrado] Importe: " + MONEDA + importe);
             break;
         
         case OP_ESTADISTICAS:
@@ -94,7 +96,6 @@ do
             Console.WriteLine("Fecha de inscripción: " + cliente.FechaInscripcion.ToLongDateString());
             Console.WriteLine("Tipo de entrada: " + cliente.TipoEntrada);
             Console.WriteLine("Cantidad: " + cliente.Cantidad);
-            Console.WriteLine("Importe a abonar: " + MONEDA + cliente.Importe);
             break;
         
         case OP_CAMBIAR:
@@ -108,7 +109,7 @@ do
 
             Console.WriteLine("Tipo original: " + cliente.TipoEntrada);
             Console.WriteLine("Cantidad original: " + cliente.Cantidad);
-            Console.WriteLine("Importe original: " + MONEDA + cliente.Importe);
+            Console.WriteLine("Importe original: " + MONEDA + Tiquetera.CalcularImporte(cliente.TipoEntrada, cliente.Cantidad));
 
             tipoEntrada = IngresarEnteroEntre("Nuevo tipo de entrada: ", TIPO_DESDE, TIPO_HASTA);
             cantidadEntrada = IngresarEnteroDesde("Nueva cantidad: ", 1);

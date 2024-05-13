@@ -5,9 +5,8 @@ class Cliente {
     public DateTime FechaInscripcion {get; set;}
     public int TipoEntrada {get; set;}
     public int Cantidad {get; set;}
-    public double Importe {get; set;}
 
-    public Cliente(int dni, string apellido, string nombre, DateTime fechaInscripcion, int tipoEntrada, int cantidad, double importe)
+    public Cliente(int dni, string apellido, string nombre, DateTime fechaInscripcion, int tipoEntrada, int cantidad)
     {
         DNI = dni;
         Apellido = apellido;
@@ -15,6 +14,5 @@ class Cliente {
         FechaInscripcion = fechaInscripcion;
         TipoEntrada = tipoEntrada;
         Cantidad = cantidad;
-        Importe = importe;
     }
 }

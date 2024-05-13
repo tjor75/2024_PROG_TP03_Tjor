@@ -29,11 +29,10 @@ static class Tiquetera {
     {
         bool exitoso = false;
         
-        if (DicClientes.ContainsKey(id) && CalcularImporte(tipo, cantidad) > DicClientes[id].Importe)
+        if (DicClientes.ContainsKey(id) && CalcularImporte(tipo, cantidad) > CalcularImporte(DicClientes[id].TipoEntrada, DicClientes[id].Cantidad))
         {
             DicClientes[id].TipoEntrada = tipo;
             DicClientes[id].Cantidad = cantidad;
-            DicClientes[id].Importe = CalcularImporte(tipo, cantidad);
             exitoso = true;
         }
         
@@ -112,10 +111,10 @@ static class Tiquetera {
     private static double ObtenerRecaudacionTipo(int tipo)
     {
         double recaudacion = 0;
-        foreach (int key in DicClientes.Keys)
+        foreach (int id in DicClientes.Keys)
         {
-            if (DicClientes[key].TipoEntrada == tipo)
-                recaudacion += DicClientes[key].Importe;
+            if (DicClientes[id].TipoEntrada == tipo)
+                recaudacion += CalcularImporte(DicClientes[id].TipoEntrada, DicClientes[id].Cantidad);
         }
         return recaudacion;
     }
